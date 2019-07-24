@@ -1,6 +1,7 @@
 install.packages('fastDummies')
 install.packages('corrplot')
 install.packages('glmulti')
+install.packages('rJava')
 
 library(readr)
 library(fastDummies)
@@ -8,6 +9,8 @@ library(dplyr)
 library(corrplot)
 library(ggplot2)
 library(glmulti)
+library(rJava)
+
 
 dataset <- read_delim("data2.csv", ";", escape_double = FALSE, col_types = cols(X1 = col_skip(), propertyCode = col_number(), rooms = col_integer(), thumbnail = col_skip()),  locale = locale(date_names = "es", encoding = "ISO-8859-1"),      trim_ws = TRUE)
 #Some data cleaning
@@ -49,31 +52,29 @@ corMatrix <- lnData %>% select(c(priceByArea,d_exterior,rooms,bathrooms,.data_re
 corrplot(corMatrix, method="circle")
 
 
-#Modeling
-linearMod <- lm(priceByArea ~ big+.data_good+rooms+floor+bathrooms+d_lift+d_exterior, data=lnData)  #
-summary(linearMod)
-dataset %>% group_by(status) %>% tally()
-
-
-# Basic scatter plot
-ggplot(lnData, aes(x=priceByArea, y=rooms)) + geom_point()
-
-
 #Gmulti optimization
 allVariables <- lnData %>% select(c(priceByArea,rooms,bathrooms,.data_renew,
                                     .data_newdevelopment,.data_good,d_parking
-                                    ,d_lift,size,numPhotos,price,big,floor,d_exterior))
+                                    ,d_lift,size,big,floor,d_exterior))
 
-lmMulti <- glmulti(names(allVariables)[1],names(allVariables)[-1], data=allVariables, method="i",report=TRUE, maxsize=6)
+lmMulti <- glmulti(names(allVariables)[1],names(allVariables)[-1], data=allVariables, method="i", report = TRUE, intercept = TRUE , level = 1)
 
-summary(lmMulti[bestmodel])
-summary(lm(priceByArea ~ 1 + rooms + bathrooms + d_parking + d_lift + size +     
-     numPhotos + price + floor + bathrooms:rooms + .data_renew:rooms + 
-    .data_renew:bathrooms + .data_newdevelopment:bathrooms +      
-    .data_good:rooms + .data_good:.data_renew + d_parking:rooms +  
-    d_lift:bathrooms + d_lift:.data_newdevelopment + size:rooms +    
-     size:bathrooms + size:.data_renew + size:.data_newdevelopment +  
-     size:d_parking + size:d_lift + price:rooms + price:bathrooms +   
-     price:.data_newdevelopment + price:.data_good + price:d_lift +   
-    price:size + big:rooms + big:d_parking + big:size + big:price +  
-    floor:.data_good + floor:d_lift + floor:price,data=allVariables))
+summary(lmMulti)
+lmFitted <- lm(priceByArea ~ 1 + rooms + bathrooms + .data_renew + .data_newdevelopment + d_parking + big + floor + d_exterior, data=allVariables )
+summary(lmFitted)
+
+
+#Value our house
+rooms <- 1
+bathrooms <- 1
+.data_newdevelopment <- 0
+.data_renew <- 0
+d_parking <- 0
+big <- 0
+floor <- 1
+d_exterior <- 1
+size <- 68
+newdata <- list(rooms=rooms,bathrooms=bathrooms,
+     .data_newdevelopment=.data_newdevelopment,.data_renew=.data_renew,d_parking=d_parking,
+     big=big,floor=floor,d_exterior=d_exterior) 
+predict(lmFitted,newdata = newdata)*size 
