@@ -1,7 +1,7 @@
 #Requiered packages
-#install.packages('httr') #For the request
-#install.packages('jsonlite') #to parse json
-#install.packages('gtools')
+install.packages('httr') #For the request
+install.packages('jsonlite') #to parse json
+install.packages('gtools')
 
 #Load packages
 library('httr')
