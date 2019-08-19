@@ -11,7 +11,7 @@ library(ggplot2)
 library(glmulti)
 library(rJava)
 
-
+write.csv2(data,"data2.csv")
 dataset <- read_delim("data2.csv", ";", escape_double = FALSE, col_types = cols(X1 = col_skip(), propertyCode = col_number(), rooms = col_integer(), thumbnail = col_skip()),  locale = locale(date_names = "es", encoding = "ISO-8859-1"),      trim_ws = TRUE)
 #Some data cleaning
 
@@ -22,7 +22,7 @@ dataset <- cbind(dataset,dummy_cols(dataset$hasParkingSpace)) %>%
           select(-c('.data','.data_NA')) %>% 
           rename(d_parking=.data_TRUE) #Parking
 dataset <- cbind(dataset,dummy_cols(dataset$hasLift)) %>% 
-  select(-c('.data','.data_NA','.data_FALSE')) %>% 
+  select(-c('.data','.data_FALSE')) %>% 
   rename(d_lift=.data_TRUE) #Lift
 dataset <- cbind(dataset,dummy_cols(dataset$exterior)) %>% 
   select(-c('.data','.data_FALSE')) %>% 

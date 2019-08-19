@@ -52,9 +52,8 @@ searchIdealista <- function(token,parameters){
         data<-rbind(data,elementDF)
       }
     }
-    return(data.frame('responseCode'=responseCode,'data'=data))
+    return(data)
   }
-  
   
   data <- tibble()
   data <- parseResults(results,data)
@@ -75,8 +74,9 @@ searchIdealista <- function(token,parameters){
   }
   
   #Cleaning variables up
-#  return(data)
-  return(content(r,as='parsed')) }
+  return(data)
+  #return(content(r,as='parsed'))
+    }
 }
 
 
@@ -91,8 +91,9 @@ locale <- 'es'
 operation <- 'sale' #'rent'
 propertyType <- 'homes' # offices, premises, garages, bedrooms
 center <- '40.4265735,-3.6804183'
-distance <- '100'
-maxItems= '30'
+#center<- '40.3995382,-3.6893548'
+distance <- '150'
+maxItems= '150'
 numPage='1'
 apiKey=key
 lbody = list(locale=locale,operation=operation,
@@ -104,3 +105,4 @@ token <- getTokenOAuth2(LoginUrl,key)
 data <- searchIdealista(token,lbody)
 
 rm(list=setdiff(ls(), 'data'))
+write.dcf(data,'latestSearch.dcf')
